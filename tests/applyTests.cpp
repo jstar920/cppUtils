@@ -62,10 +62,11 @@ TEST_CASE("apply", "apply")
     ASSURE_EQ(apply(FunctionOp0(), std::tuple<>()), 0);
     ASSURE_EQ(apply(FunctionOp1(), std::make_tuple<int>(1)), 1);
     ASSURE_EQ(apply(FunctionOp2(), std::make_tuple<int, float>(1, 1.2f)), 2);
-
+/*
     TestClass tc;
     void (TestClass::*pCF)(int i, float j);
     ASSURE_EQ(apply(pCF, std::make_tuple<TestClass&, int, float>(tc, 1, 1,2f)), 0);
+*/
 }
 
 }

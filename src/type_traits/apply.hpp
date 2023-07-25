@@ -3,9 +3,19 @@
 
 namespace cpputils
 {
+
     template<class F, class Tuple, std::size_t... I>
     constexpr decltype(auto) apply_imp(F&& f, Tuple&& t, std::index_sequence<I...>)
     {
+        if (std::is_member_pointer_v<std::decay_t<F>>)
+        {
+           // return apply_memfun_imp(std::forward<F>(f), std::get<I>(std::forward<Tuple>(t))...)
+        }
+        else
+        {
+            return std::forward<F>(f)(std::get<I>(std::forward<Tuple>(t))...);
+        }
+
         return std::forward<F>(f)(std::get<I>(std::forward<Tuple>(t))...);
     }
 
