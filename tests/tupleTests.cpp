@@ -31,6 +31,7 @@ namespace tupleTests
             ASSURE_EQ(std::get<3>(subTp), std::string("2"));
             ASSURE_EQ(std::get<4>(subTp), 3);
             ASSURE_EQ(std::get<5>(subTp), std::string("3"));
+            //static_assert(decltype(std::get<0>(subTp)), decltype(std::get<0>(tp)), "Type different");
         }
     }
 }

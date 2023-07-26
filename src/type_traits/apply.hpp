@@ -1,27 +1,38 @@
 #pragma once
+#include "tuple.hpp"
 #include <type_traits>
+
 
 namespace cpputils
 {
 
-    template<class F, class Tuple, std::size_t... I>
-    constexpr decltype(auto) apply_imp(F&& f, Tuple&& t, std::index_sequence<I...>)
+    template <typename FP, class C, class Tuple, std::size_t... I>
+    constexpr decltype(auto) apply_memfun_imp(FP f, C obj, Tuple t, std::index_sequence<I...>)
     {
-        if (std::is_member_pointer_v<std::decay_t<F>>)
+        if (std::is_pointer_v<C>)
         {
-           // return apply_memfun_imp(std::forward<F>(f), std::get<I>(std::forward<Tuple>(t))...)
+            return obj->*f(std::get<I>(t)...);
         }
         else
         {
-            return std::forward<F>(f)(std::get<I>(std::forward<Tuple>(t))...);
+            return obj.*f(std::get<I>(t)...);
         }
-
-        return std::forward<F>(f)(std::get<I>(std::forward<Tuple>(t))...);
+    }
+    template<typename F, class Tuple, std::enable_if_t<std::is_member_pointer_v<std::decay_t<F>>, bool> = true, std::size_t... I>
+    constexpr decltype(auto) apply_imp(F f, Tuple t, std::index_sequence<I...>)
+    {
+        return apply_memfun_imp(f, std::get<0>(t), sub_tuple<1, std::tuple_size<decltype(t)>::value - 1>(t))
     }
 
-    template<class F, class Tuple>
-    constexpr decltype(auto) apply(F&& f, Tuple&& t)
+    template<typename F, class Tuple, std::enable_if_t<!std::is_member_pointer_v<std::decay_t<F>>, bool> = true, std::size_t... I>
+    constexpr decltype(auto) apply_imp(F f, Tuple t, std::index_sequence<I...>)
     {
-        return apply_imp(std::forward<F>(f), std::forward<Tuple>(t), std::make_index_sequence<std::tuple_size<Tuple>::value>());
+        return f(std::get<I>(t)...);
+    }
+
+    template<typename F, class Tuple>
+    constexpr decltype(auto) apply(F f, Tuple t)
+    {
+        return apply_imp(f, t, std::make_index_sequence<std::tuple_size<Tuple>::value>());
     }
 }
