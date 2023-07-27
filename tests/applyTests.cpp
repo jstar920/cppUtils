@@ -50,7 +50,18 @@ namespace applyTest
     {
     public:
         int f(int, float) { return 0; }
+        int changePara(int& a)
+        {
+            a = 10;
+            return 0;
+        }
     };
+
+    int changePara(int& a)
+    {
+        a = 10;
+        return 0;
+    }
 
 TEST_CASE("apply", "apply")
 {
@@ -62,11 +73,30 @@ TEST_CASE("apply", "apply")
     ASSURE_EQ(apply(FunctionOp0(), std::tuple<>()), 0);
     ASSURE_EQ(apply(FunctionOp1(), std::make_tuple<int>(1)), 1);
     ASSURE_EQ(apply(FunctionOp2(), std::make_tuple<int, float>(1, 1.2f)), 2);
-/*
+
     TestClass tc;
-    void (TestClass::*pCF)(int i, float j);
-    ASSURE_EQ(apply(pCF, std::make_tuple<TestClass&, int, float>(tc, 1, 1,2f)), 0);
-*/
+    int (TestClass::*pCF)(int i, float j) = &TestClass::f;
+    ASSURE_EQ(apply(pCF, std::make_tuple(tc, 1, 1.2f)), 0);
+    ASSURE_EQ(apply(pCF, std::make_tuple(&tc, 1, 1.2f)), 0);
+    ASSURE_EQ(apply(&TestClass::f, std::make_tuple(tc, 1, 1.2f)), 0);
+    ASSURE_EQ(apply(&TestClass::f, std::make_tuple(&tc, 1, 1.2f)), 0);
+
+    auto lambdaF = [](int i, float j) {
+        return 0;
+    };
+
+    ASSURE_EQ(apply(lambdaF, std::make_tuple(1, 1.2f)), 0);
+
+    int a = 0;
+    ASSURE_EQ(apply(changePara, std::tuple<int&>(a)), 0);
+    ASSURE_EQ(a, 10);
+
+    ASSURE_EQ(apply(&TestClass::changePara, std::make_tuple<TestClass&, int&>(tc, a)), 0);
+    ASSURE_EQ(a, 10);
+
+    ASSURE_EQ(apply(&TestClass::changePara, std::make_tuple<TestClass*, int&>(&tc, a)), 0);
+    ASSURE_EQ(a, 10);
+
 }
 
 }

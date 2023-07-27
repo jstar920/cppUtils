@@ -7,7 +7,7 @@ namespace cpputils
     template <size_t...Indice, typename...Args>
     constexpr auto sub_tuple_imp(std::index_sequence<Indice...> indice, std::tuple<Args...> tp)
     {
-        return std::make_tuple(std::get<Indice>(tp)...);
+        return std::forward_as_tuple(std::forward<decltype(std::get<Indice>(tp))>(std::get<Indice>(tp))...);
     }
 
     template<size_t N, size_t M, typename...Args>
